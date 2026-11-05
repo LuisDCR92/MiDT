@@ -1,0 +1,20 @@
+import os
+HERE=os.path.dirname(os.path.abspath(__file__))
+exec(open(os.path.join(HERE,'run_tests.py')).read().split('with sync_playwright()')[0])
+from playwright.sync_api import sync_playwright
+with sync_playwright() as p:
+    b=p.chromium.launch(); ctx,pg=nuevo(b)
+    pg.goto(APP); pg.wait_for_timeout(500)
+    pg.fill('#authEmail','dir@test.mx'); pg.fill('#authPass','secreto123'); pg.click('#linkAuthModo'); pg.click('#btnAuth'); pg.wait_for_timeout(500)
+    pg.evaluate("(()=>{__mock.S.t.codigos_alta=[{codigo:'ALTA1'}];localStorage.setItem('__mockdb',JSON.stringify(__mock.S))})()")
+    ok('el formulario pide código de alta', pg.is_visible('#onbCodigoAlta'))
+    pg.fill('#onbNombreAcademia','Pirata'); pg.fill('#onbCodigoAlta','MALO'); pg.click('#formCrearAcademia button'); pg.wait_for_timeout(500)
+    ok('código malo: mensaje claro y no entra', 'código de alta' in pg.inner_text('#onbMsg').lower() and pg.evaluate("document.body.dataset.modo")=='onb', pg.inner_text('#onbMsg'))
+    pg.fill('#onbCodigoAlta','alta1'); pg.click('#formCrearAcademia button'); pg.wait_for_timeout(900)
+    ok('código bueno (en minúsculas) crea la academia', pg.evaluate("document.body.dataset.modo+'/'+document.body.dataset.rol")=='staff/director')
+    pg.evaluate("document.querySelector('[data-tab=ajustes]').click()"); pg.click('#btnCerrarSesion'); pg.wait_for_timeout(600)
+    pg.fill('#authEmail','otro@test.mx'); pg.fill('#authPass','secreto123'); pg.click('#linkAuthModo'); pg.click('#btnAuth'); pg.wait_for_timeout(600)
+    pg.fill('#onbNombreAcademia','Copia'); pg.fill('#onbCodigoAlta','ALTA1'); pg.click('#formCrearAcademia button'); pg.wait_for_timeout(500)
+    ok('un código usado no se puede reutilizar', pg.evaluate("document.body.dataset.modo")=='onb')
+    b.close()
+print('ERRORES JS:',errors); print('RESUMEN: %d/%d'%(sum(1 for _,c in res if c),len(res)))

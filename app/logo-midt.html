@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiDT · Generador de iconos</title>
+<style>
+* { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+body { margin: 0; padding: 2rem 1rem; background: #f0f4f8; color: #1a202c; }
+.container { max-width: 900px; margin: auto; }
+h1 { color: #1e3a8a; text-align: center; }
+h2 { color: #1e3a8a; font-size: 1.1rem; margin-top: 2rem; }
+.sub { text-align: center; color: #64748b; margin-bottom: 2rem; font-size: 0.9rem; }
+.card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+.preview-principal { text-align: center; }
+.preview-principal svg { width: 200px; height: 200px; border-radius: 22%; box-shadow: 0 8px 24px rgba(30,58,138,0.25); }
+.variantes { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem; }
+.variante { text-align: center; cursor: pointer; }
+.variante svg { width: 80px; height: 80px; border-radius: 22%; transition: transform 0.15s; }
+.variante svg:hover { transform: scale(1.1); }
+.variante.activa svg { outline: 3px solid #1e3a8a; outline-offset: 3px; }
+.variante label { display: block; font-size: 0.75rem; color: #64748b; margin-top: 0.3rem; font-weight: 600; }
+.tamaños { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.tamaño-item { background: white; padding: 1rem; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.tamaño-item .muestra { display: flex; align-items: center; justify-content: center; height: 90px; margin-bottom: 0.5rem; }
+.tamaño-item svg { border-radius: 22%; }
+.tamaño-item .info { font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem; }
+.tamaño-item .info strong { color: #1a202c; font-size: 1rem; }
+.tamaño-item button { background: #1e3a8a; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; width: 100%; font-weight: 600; font-size: 0.85rem; transition: background 0.15s; }
+.tamaño-item button:hover { background: #1e40af; }
+.tamaño-item button:active { background: #1e3a8a; transform: scale(0.98); }
+.wordmark { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 12px; color: white; }
+.wordmark .fila { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+.wordmark svg { width: 70px; height: 70px; }
+.wordmark h3 { font-size: 2.5rem; font-weight: 800; margin: 0; letter-spacing: -1px; }
+.badge-store { display: inline-block; background: #dcfce7; color: #14532d; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; margin-left: 0.4rem; }
+.tip { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.8rem; border-radius: 6px; font-size: 0.85rem; margin-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🎨 MiDT · Kit de iconos</h1>
+  <p class="sub">Diseño oficial para Google Play, App Store y PWA</p>
+
+  <div class="card preview-principal">
+    <div id="previewGrande"></div>
+    <p style="color:#64748b;font-size:0.85rem;margin-top:1rem">Vista previa · 200×200</p>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">🎨 Variantes de color</h2>
+    <div class="variantes" id="variantes"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">🔤 Versión con wordmark (web, marketing, splash)</h2>
+    <div class="wordmark">
+      <div class="fila">
+        <div id="iconoWordmark"></div>
+        <h3>MiDT</h3>
+      </div>
+      <p style="margin:0.5rem 0 0;opacity:0.9;font-size:0.9rem">Panel del Entrenador</p>
+    </div>
+  </div>
+
+  <h2>📥 Descargar iconos</h2>
+  <p class="sub">Pulsa cada botón para descargar el PNG en el tamaño correspondiente</p>
+
+  <h3 style="color:#64748b;font-size:0.9rem;margin-top:1.5rem">Google Play</h3>
+  <div class="tamaños" id="tamañosGoogle"></div>
+
+  <h3 style="color:#64748b;font-size:0.9rem;margin-top:1.5rem">App Store (iOS)</h3>
+  <div class="tamaños" id="tamañosApple"></div>
+
+  <h3 style="color:#64748b;font-size:0.9rem;margin-top:1.5rem">PWA / Web</h3>
+  <div class="tamaños" id="tamañosWeb"></div>
+
+  <div class="tip">
+    💡 <strong>Tip:</strong> Las tiendas aplican el redondeo de esquinas automáticamente. Los PNG deben ir con esquinas cuadradas (como se generan aquí).
+  </div>
+</div>
+
+<script>
+// ============================================
+// COLORES DE LAS VARIANTES
+// ============================================
+const variantes = {
+  azul:    { c1: '#1e3a8a', c2: '#3b82f6', hole: '#2563eb', nombre: 'Azul (oficial)' },
+  verde:   { c1: '#14532d', c2: '#16a34a', hole: '#22c55e', nombre: 'Verde cancha' },
+  negro:   { c1: '#0f172a', c2: '#334155', hole: '#1e293b', nombre: 'Oscuro elegante' },
+  naranja: { c1: '#9a3412', c2: '#f97316', hole: '#fb923c', nombre: 'Naranja energía' }
+};
+
+let varianteActiva = 'azul';
+
+// ============================================
+// FUNCIÓN QUE GENERA EL SVG DEL LOGO
+// ============================================
+function crearSVG(variante, tamaño = 512, conID = '') {
+  const c = variantes[variante];
+  const uid = conID || Math.random().toString(36).slice(2, 8);
+  return `<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" width="${tamaño}" height="${tamaño}">
+  <defs>
+    <linearGradient id="bg-${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${c.c1}"/>
+      <stop offset="100%" stop-color="${c.c2}"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg-${uid})"/>
+  <g transform="translate(256 276)">
+    <circle cx="0" cy="-100" r="22" fill="none" stroke="white" stroke-width="14"/>
+    <rect x="-110" y="-90" width="200" height="180" rx="65" fill="white"/>
+    <rect x="75" y="-24" width="110" height="48" rx="12" fill="white"/>
+    <circle cx="-15" cy="-15" r="30" fill="${c.hole}"/>
+  </g>
+</svg>`;
+}
+
+// ============================================
+// RENDER INICIAL
+// ============================================
+function renderVariantes() {
+  const cont = document.getElementById('variantes');
+  cont.innerHTML = '';
+  Object.entries(variantes).forEach(([key, v]) => {
+    const div = document.createElement('div');
+    div.className = 'variante' + (key === varianteActiva ? ' activa' : '');
+    div.innerHTML = crearSVG(key, 80, 'var-' + key);
+    const label = document.createElement('label');
+    label.textContent = v.nombre;
+    div.appendChild(label);
+    div.onclick = () => {
+      varianteActiva = key;
+      renderVariantes();
+      renderPreview();
+      renderTamaños();
+    };
+    cont.appendChild(div);
+  });
+}
+
+function renderPreview() {
+  document.getElementById('previewGrande').innerHTML = crearSVG(varianteActiva, 200, 'preview');
+  document.getElementById('iconoWordmark').innerHTML = crearSVG(varianteActiva, 70, 'wm');
+}
+
+// ============================================
+// TAMAÑOS REQUERIDOS POR CADA TIENDA
+// ============================================
+const tamañosGoogle = [
+  { size: 512, nombre: '512×512', nota: 'Icono Google Play' },
+  { size: 1024, nombre: '1024×1024', nota: 'Alta resolución' }
+];
+const tamañosApple = [
+  { size: 1024, nombre: '1024×1024', nota: 'App Store iOS' }
+];
+const tamañosWeb = [
+  { size: 192, nombre: '192×192', nota: 'PWA Android' },
+  { size: 512, nombre: '512×512', nota: 'PWA alta res.' },
+  { size: 180, nombre: '180×180', nota: 'Apple touch icon' },
+  { size: 32,  nombre: '32×32',   nota: 'Favicon' }
+];
+
+function renderTamaños() {
+  const lista = [
+    ['tamañosGoogle', tamañosGoogle],
+    ['tamañosApple', tamañosApple],
+    ['tamañosWeb', tamañosWeb]
+  ];
+  lista.forEach(([id, arr]) => {
+    const cont = document.getElementById(id);
+    cont.innerHTML = '';
+    arr.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'tamaño-item';
+      div.innerHTML = `
+        <div class="muestra">${crearSVG(varianteActiva, Math.min(t.size, 80), 'sz-' + id + '-' + t.size)}</div>
+        <div class="info"><strong>${t.nombre}</strong><br>${t.nota}</div>
+        <button data-size="${t.size}" data-nombre="${t.nombre}">📥 Descargar PNG</button>
+      `;
+      cont.appendChild(div);
+    });
+  });
+
+  // Listeners de descarga
+  document.querySelectorAll('.tamaño-item button').forEach(btn => {
+    btn.onclick = () => descargarPNG(parseInt(btn.dataset.size), btn.dataset.nombre);
+  });
+}
+
+// ============================================
+// SVG → PNG
+// ============================================
+function descargarPNG(tamaño, etiqueta) {
+  const svgString = crearSVG(varianteActiva, tamaño, 'dl-' + Date.now());
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = tamaño;
+    canvas.height = tamaño;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, tamaño, tamaño);
+    canvas.toBlob(blobFinal => {
+      const urlFinal = URL.createObjectURL(blobFinal);
+      const a = document.createElement('a');
+      a.href = urlFinal;
+      a.download = `midt-icon-${tamaño}x${tamaño}.png`;
+      a.click();
+      URL.revokeObjectURL(urlFinal);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+  img.src = url;
+}
+
+// ============================================
+// INIT
+// ============================================
+renderVariantes();
+renderPreview();
+renderTamaños();
+</script>
+</body>
+</html>
