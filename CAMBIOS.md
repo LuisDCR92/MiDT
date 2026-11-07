@@ -69,3 +69,8 @@ Se puede hacer en cualquier orden: la app sigue funcionando aunque falte alguno 
 - "Mis datos de entrenador" plegado.
 - Ajustes: respaldo e importación pasan a "Respaldo y herramientas avanzadas" (plegado).
 - Service worker v7.
+
+## Rev 6 — Convocar y Evaluar más ordenados
+- Convocar: recuerda el último lugar y uniforme de cada equipo; botones "Todos / Ninguno" con contador de convocados; rival y notas plegados en "Más datos".
+- Evaluar: sub-pestañas Evaluar / Progreso / Historial / Nuevo (ejercicio). Sin quitar funciones.
+- Service worker v8.

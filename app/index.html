@@ -89,10 +89,14 @@ nav.tabs::-webkit-scrollbar { display: none; }
 .subtabs { display: flex; gap: 0.4rem; margin: 0 0 1rem; overflow-x: auto; }
 .subtabs button { flex: 1 1 auto; padding: 0.55rem 0.8rem; border-radius: 999px; border: 1.5px solid var(--border, #e2e8f0); background: #fff; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
 .subtabs button.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+@media (max-width: 500px) { .subtabs button { flex: 1 1 0; padding: 0.5rem 0.3rem; font-size: 0.76rem; } }
 details.mas-datos { margin: 0.6rem 0; }
 details.mas-datos > summary { cursor: pointer; font-weight: 600; color: var(--primary); padding: 0.5rem 0; list-style: none; }
 details.mas-datos > summary::-webkit-details-marker { display: none; }
 details.card-det { background: #fff; border-radius: 12px; padding: 0.4rem 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.conv-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: 1rem; }
+.conv-head h3 { margin: 0; }
+.conv-cont { font-weight: 500; font-size: .8rem; color: var(--text-muted); }
 .tab-content { display: none; padding: 1.25rem 1rem; max-width: 920px; margin: auto; animation: fadeIn 0.25s ease-out; }
 .tab-content.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -366,14 +370,13 @@ dialog.dlg-ui { width: min(420px, 92vw); }
 </nav>
 
 <section id="partido" class="tab-content active">
-  <h2>Datos del Partido</h2>
+  <h2>Convocar al partido</h2>
   <form id="formPartido">
     <div class="grid-2">
       <label>Día del juego <input type="date" id="dia" required></label>
       <label>Hora <input type="time" id="hora" required></label>
     </div>
     <label>Lugar <input type="text" id="lugar" placeholder="Ej: Campo Municipal Norte" required></label>
-    <label>Rival (opcional) <input type="text" id="rival" placeholder="Ej: Colegio San José"></label>
     <label>Uniforme
       <div class="uniforme-row">
         <input type="text" id="uniforme" placeholder="Ej: Camiseta roja, short blanco, medias rojas">
@@ -381,10 +384,14 @@ dialog.dlg-ui { width: min(420px, 92vw); }
       </div>
     </label>
     <div class="presets-lista" id="presetsUniforme"></div>
-    <label style="margin-top:0.9rem">Notas extra (opcional)
-      <textarea id="notas" rows="2" placeholder="Ej: Llevar botas de tacos y agua"></textarea>
-    </label>
-    <h3>Convocados</h3>
+    <details class="mas-datos"><summary>＋ Más datos (rival, notas)</summary>
+      <label>Rival <input type="text" id="rival" placeholder="Ej: Colegio San José"></label>
+      <label>Notas extra
+        <textarea id="notas" rows="2" placeholder="Ej: Llevar botas de tacos y agua"></textarea>
+      </label>
+    </details>
+    <div class="conv-head"><h3>Convocados <span id="contConv" class="conv-cont"></span></h3>
+      <span><button type="button" class="btn-mini" id="btnConvTodos">Todos</button> <button type="button" class="btn-mini" id="btnConvNinguno">Ninguno</button></span></div>
     <div id="listaJugadoresPartido" class="grid-jugadores"></div>
     <div class="acciones">
       <button type="button" id="btnGenerar" class="btn-primary">Generar mensajes</button>
@@ -530,11 +537,56 @@ dialog.dlg-ui { width: min(420px, 92vw); }
 </section>
 
 <section id="ejercicios" class="tab-content">
-  <h2>🏋️ Ejercicios y Evaluaciones</h2>
-  <p class="hint">Crea ejercicios para medir el progreso físico de tus jugadores. Puedes evaluarlos por vueltas, tiempo, repeticiones, distancia o cualquier unidad personalizada.</p>
+  <div class="subtabs" id="subEval"><button type="button" data-pane="evaluar" class="active">📝 Evaluar</button><button type="button" data-pane="progreso">📈 Progreso</button><button type="button" data-pane="historial-ev">🗂️ Historial</button><button type="button" data-pane="nuevo-ej">➕ Nuevo</button></div>
+  <div class="ev-pane" data-pane="evaluar">
+  <p class="hint">Elige un ejercicio y toca <strong>📝 Evaluar</strong> para capturar los resultados.</p>
+  <div id="listaEjercicios"></div>
 
+  <form id="formEvaluacion" style="display:none">
+    <h3 style="margin-top:0">📝 Registrar evaluación</h3>
+    <div class="grid-2">
+      <label>Ejercicio <select id="evEjercicio" required></select></label>
+      <label>Fecha <input type="date" id="evFecha" required></label>
+    </div>
+    <label>Resultados por jugador
+      <p class="hint" style="margin:0.4rem 0">Rellena el valor de cada jugador. Deja vacío si no participó en esta evaluación.</p>
+      <div id="listaEvaluacionJugadores"></div>
+    </label>
+    <div class="acciones">
+      <button type="submit" class="btn-primary">💾 Guardar evaluación</button>
+      <button type="button" class="btn-mini" id="btnCancelarEvaluacion">Cancelar</button>
+    </div>
+  </form>
+
+  </div>
+  <div class="ev-pane" data-pane="progreso" style="display:none">
+  <h3 style="margin-top:0">📈 Evolución de un jugador</h3>
+  <form>
+    <div class="grid-2">
+      <label>Ejercicio <select id="grafEjercicio"></select></label>
+      <label>Jugador <select id="grafJugador"></select></label>
+    </div>
+  </form>
+  <div class="chart-scroll"><div class="chart-container"><canvas id="chartEjercicio"></canvas></div></div>
+  <div id="resumenEjercicio"></div>
+
+  <h3>⚖️ Comparativa de jugadores en una evaluación</h3>
+  <form>
+    <div class="grid-2">
+      <label>Ejercicio <select id="compEjercicio"></select></label>
+      <label>Evaluación <select id="compEvaluacion"></select></label>
+    </div>
+  </form>
+  <div class="chart-scroll"><div class="chart-container"><canvas id="chartComparativaEjercicio"></canvas></div></div>
+
+  </div>
+  <div class="ev-pane" data-pane="historial-ev" style="display:none">
+  <div id="listaEvaluaciones"></div>
+  </div>
+  <div class="ev-pane" data-pane="nuevo-ej" style="display:none">
   <form id="formEjercicio">
-    <h3 style="margin-top:0">➕ Crear nuevo ejercicio</h3>
+    <h3 style="margin-top:0">➕ Nuevo ejercicio</h3>
+    <p class="hint">Mide lo que quieras: repeticiones, vueltas, tiempo, distancia o algo personalizado.</p>
     <div class="grid-2">
       <label>Nombre del ejercicio
         <input type="text" id="ejNombre" placeholder="Ej: Sprint 40m" required>
@@ -560,46 +612,7 @@ dialog.dlg-ui { width: min(420px, 92vw); }
     <button type="submit" class="btn-primary">Crear ejercicio</button>
   </form>
 
-  <h3>📋 Ejercicios creados</h3>
-  <div id="listaEjercicios"></div>
-
-  <form id="formEvaluacion" style="display:none">
-    <h3 style="margin-top:0">📝 Registrar evaluación</h3>
-    <div class="grid-2">
-      <label>Ejercicio <select id="evEjercicio" required></select></label>
-      <label>Fecha <input type="date" id="evFecha" required></label>
-    </div>
-    <label>Resultados por jugador
-      <p class="hint" style="margin:0.4rem 0">Rellena el valor de cada jugador. Deja vacío si no participó en esta evaluación.</p>
-      <div id="listaEvaluacionJugadores"></div>
-    </label>
-    <div class="acciones">
-      <button type="submit" class="btn-primary">💾 Guardar evaluación</button>
-      <button type="button" class="btn-mini" id="btnCancelarEvaluacion">Cancelar</button>
-    </div>
-  </form>
-
-  <h3>📈 Evolución de un jugador</h3>
-  <form>
-    <div class="grid-2">
-      <label>Ejercicio <select id="grafEjercicio"></select></label>
-      <label>Jugador <select id="grafJugador"></select></label>
-    </div>
-  </form>
-  <div class="chart-scroll"><div class="chart-container"><canvas id="chartEjercicio"></canvas></div></div>
-  <div id="resumenEjercicio"></div>
-
-  <h3>⚖️ Comparativa de jugadores en una evaluación</h3>
-  <form>
-    <div class="grid-2">
-      <label>Ejercicio <select id="compEjercicio"></select></label>
-      <label>Evaluación <select id="compEvaluacion"></select></label>
-    </div>
-  </form>
-  <div class="chart-scroll"><div class="chart-container"><canvas id="chartComparativaEjercicio"></canvas></div></div>
-
-  <h3>🗂️ Historial de evaluaciones</h3>
-  <div id="listaEvaluaciones"></div>
+  </div>
 </section>
 
 <section id="graficos" class="tab-content">
@@ -865,6 +878,12 @@ function irATab(t) {
   if (t === 'ejercicios') renderEjerciciosSection();
   if (t === 'ajustes') renderCumplesAjustes();
 }
+function irAPane(p) {
+  document.querySelectorAll('#subEval button').forEach(b => b.classList.toggle('active', b.dataset.pane === p));
+  document.querySelectorAll('.ev-pane').forEach(d => { d.style.display = d.dataset.pane === p ? '' : 'none'; });
+  if (typeof renderEjerciciosSection === 'function') renderEjerciciosSection();
+}
+document.querySelectorAll('#subEval button').forEach(b => b.addEventListener('click', () => irAPane(b.dataset.pane)));
 document.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => irATab(btn.dataset.tab)));
 irATab('partido');
 
@@ -1182,6 +1201,26 @@ function mostrarEnviosPartido() {
   cont.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 document.getElementById('btnGenerar').addEventListener('click', mostrarEnviosPartido);
+function actualizarContConv() {
+  const todos = listaJugadoresPartido.querySelectorAll('input[type=checkbox]');
+  const marc = listaJugadoresPartido.querySelectorAll('input[type=checkbox]:checked');
+  const el = document.getElementById('contConv'); if (el) el.textContent = todos.length ? `(${marc.length} de ${todos.length})` : '';
+}
+function marcarConv(v) { listaJugadoresPartido.querySelectorAll('input[type=checkbox]').forEach(c => { c.checked = v; }); actualizarContConv(); }
+document.getElementById('btnConvTodos').addEventListener('click', () => marcarConv(true));
+document.getElementById('btnConvNinguno').addEventListener('click', () => marcarConv(false));
+listaJugadoresPartido.addEventListener('change', actualizarContConv);
+new MutationObserver(actualizarContConv).observe(listaJugadoresPartido, { childList: true });
+// Recordar lugar y uniforme del último partido de cada equipo
+function claveConv() { const t = getTeam(); return t ? 'midt_conv_' + t.id : null; }
+function recordarConv() { try { const k = claveConv(); if (k) localStorage.setItem(k, JSON.stringify({ lugar: document.getElementById('lugar').value, uniforme: document.getElementById('uniforme').value })); } catch (e) {} }
+function precargarConv() {
+  const t = getTeam(); if (!t || window.__convEquipo === t.id) return; window.__convEquipo = t.id;
+  try { const d = JSON.parse(localStorage.getItem(claveConv()) || 'null');
+    document.getElementById('lugar').value = d ? d.lugar || '' : ''; document.getElementById('uniforme').value = d ? d.uniforme || '' : ''; } catch (e) {}
+}
+document.getElementById('btnGenerar').addEventListener('click', recordarConv);
+document.getElementById('btnEnviarTodos').addEventListener('click', recordarConv);
 document.getElementById('btnEnviarTodos').addEventListener('click', mostrarEnviosPartido);
 
 // ============ ENTRENAMIENTOS ============
@@ -1510,7 +1549,7 @@ function renderListaEjercicios() {
   const t = getTeam(); listaEjercicios.innerHTML = '';
   if (!t) { listaEjercicios.innerHTML = '<p>Crea un equipo primero</p>'; return; }
   if (t.ejercicios.length === 0) {
-    listaEjercicios.innerHTML = '<p style="color:#64748b;font-size:0.9rem">Aún no has creado ejercicios. Crea el primero arriba.</p>';
+    listaEjercicios.innerHTML = '<p style="color:#64748b;font-size:0.9rem">Aún no hay ejercicios. Toca ➕ Ejercicio para crear el primero.</p>';
     return;
   }
   t.ejercicios.forEach(ej => {
@@ -2334,6 +2373,7 @@ function renderAll() {
   renderEntrenos(); renderHistorial(); renderStats(); renderGraficos();
   checkBirthdays(); renderCumplesAjustes();
   renderEjerciciosSection();
+  actualizarContConv(); precargarConv();
 }
 
 // ============ INIT ============
