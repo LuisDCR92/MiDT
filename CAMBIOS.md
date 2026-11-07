@@ -62,3 +62,10 @@ Se puede hacer en cualquier orden: la app sigue funcionando aunque falte alguno 
 - Base de datos: **119 comprobaciones** de seguridad (antes 89), incluyendo códigos de alta (sin código, inventado, reutilizado, vencido, versión antigua eliminada, nadie puede emitirlos ni leerlos) y asistencia (cada rol ve y escribe solo lo suyo). También se probó aplicar los parches 02 y 03, repetidos, sobre una base con el esquema anterior.
 - Navegador con servidor simulado: 26 + 7 + 11 + 4 + 14 pruebas (acceso y roles, migración, cuadros propios, códigos de alta, asistencia incluyendo el caso de base sin parche 03).
 - Sigue sin probarse contra tu proyecto real de Supabase desde mi entorno.
+
+## Rev 5 — Interfaz más simple
+- Pestañas principales de 8 a 5: Convocar, Equipo (Jugadores + Entrenos), Partidos (Partidos + Estadísticas + Gráficos), Evaluar, Ajustes. Las secciones de antes viven como sub‑pestañas.
+- Formulario de jugador más corto: nombre, WhatsApp, año y tutor; posición y cumpleaños en "Más datos".
+- "Mis datos de entrenador" plegado.
+- Ajustes: respaldo e importación pasan a "Respaldo y herramientas avanzadas" (plegado).
+- Service worker v7.

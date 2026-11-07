@@ -1,6 +1,6 @@
 // Service Worker de MiDT
 // Sube el número de versión cada vez que cambies index.html para que los usuarios reciban la actualización.
-const CACHE_NAME = 'midt-v6';
+const CACHE_NAME = 'midt-v7';
 const ARCHIVOS_LOCALES = [
   './',
   './index.html',

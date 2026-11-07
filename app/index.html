@@ -84,8 +84,15 @@ nav.tabs::-webkit-scrollbar { display: none; }
 .tab:hover { color: var(--primary); }
 .tab.active { color: var(--primary); }
 .tab.active::after { content: ''; position: absolute; left: 1rem; right: 1rem; bottom: 0; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0; }
-@media (max-width: 500px) { .tab { padding: 0.85rem 0.75rem 0.8rem; font-size: 0.78rem; } }
+@media (max-width: 500px) { .tab { flex: 1 1 0; padding: 0.85rem 0.2rem 0.8rem; font-size: 0.74rem; text-align: center; } .tab.active::after { left: 0.4rem; right: 0.4rem; } }
 
+.subtabs { display: flex; gap: 0.4rem; margin: 0 0 1rem; overflow-x: auto; }
+.subtabs button { flex: 1 1 auto; padding: 0.55rem 0.8rem; border-radius: 999px; border: 1.5px solid var(--border, #e2e8f0); background: #fff; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
+.subtabs button.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+details.mas-datos { margin: 0.6rem 0; }
+details.mas-datos > summary { cursor: pointer; font-weight: 600; color: var(--primary); padding: 0.5rem 0; list-style: none; }
+details.mas-datos > summary::-webkit-details-marker { display: none; }
+details.card-det { background: #fff; border-radius: 12px; padding: 0.4rem 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .tab-content { display: none; padding: 1.25rem 1rem; max-width: 920px; margin: auto; animation: fadeIn 0.25s ease-out; }
 .tab-content.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -351,14 +358,11 @@ dialog.dlg-ui { width: min(420px, 92vw); }
 <div id="birthdayBanner" class="birthday-banner"></div>
 
 <nav class="tabs">
-  <button class="tab active" data-tab="partido">📣 Convocar</button>
-  <button class="tab" data-tab="calendario">📅 Entrenos</button>
-  <button class="tab" data-tab="plantilla">👥 Plantilla</button>
-  <button class="tab" data-tab="historial">🏆 Historial</button>
-  <button class="tab" data-tab="stats">📊 Stats</button>
-  <button class="tab" data-tab="ejercicios">🏋️ Ejercicios</button>
-  <button class="tab" data-tab="graficos">📈 Gráficos</button>
-  <button class="tab" data-tab="ajustes">⚙️ Ajustes</button>
+  <button class="tab active" data-tab="partido" data-grupo="partido">📣 Convocar</button>
+  <button class="tab" data-tab="plantilla" data-grupo="equipo">👥 Equipo</button>
+  <button class="tab" data-tab="historial" data-grupo="partidos">🏆 Partidos</button>
+  <button class="tab" data-tab="ejercicios" data-grupo="evaluar">🏋️ Evaluar</button>
+  <button class="tab" data-tab="ajustes" data-grupo="ajustes">⚙️ Ajustes</button>
 </nav>
 
 <section id="partido" class="tab-content active">
@@ -393,7 +397,8 @@ dialog.dlg-ui { width: min(420px, 92vw); }
 </section>
 
 <section id="calendario" class="tab-content">
-  <h2>Calendario de Entrenamientos</h2>
+  <div class="subtabs" data-grupo="equipo"><button type="button" data-tab="plantilla">👥 Jugadores</button><button type="button" data-tab="calendario">📅 Entrenos</button></div>
+  <h2>Entrenos</h2>
   <form id="formEntreno">
     <div class="grid-2">
       <label>Fecha <input type="date" id="fechaEntreno" required></label>
@@ -416,7 +421,8 @@ dialog.dlg-ui { width: min(420px, 92vw); }
 </section>
 
 <section id="plantilla" class="tab-content">
-  <h2>👤 Datos del Entrenador</h2>
+  <div class="subtabs" data-grupo="equipo"><button type="button" data-tab="plantilla">👥 Jugadores</button><button type="button" data-tab="calendario">📅 Entrenos</button></div>
+  <details class="mas-datos card-det"><summary>👤 Mis datos de entrenador (para firmar los mensajes)</summary>
   <form id="formEntrenador">
     <div class="grid-2">
       <label>Nombre del entrenador <input type="text" id="nombreEntrenador" placeholder="Ej: Prof. Juan Pérez"></label>
@@ -424,15 +430,16 @@ dialog.dlg-ui { width: min(420px, 92vw); }
     </div>
     <button type="submit" class="btn-primary">💾 Guardar</button>
   </form>
-  <h2>Plantilla de Jugadores</h2>
-  <p class="hint">Añade nombre, WhatsApp del padre/madre, año de nacimiento y posición.</p>
+  </details>
+  <h2>Jugadores</h2>
   <form id="formJugador">
     <div class="grid-2">
       <label>Nombre <input type="text" id="nombreJugador" required></label>
       <label>WhatsApp papá/mamá <input type="tel" id="telJugador" placeholder="5215512345678" required></label>
     </div>
+    <label>Año de nacimiento <input type="number" id="anioJugador" min="1990" max="2030" placeholder="Ej: 2012" required></label>
+    <details class="mas-datos"><summary>＋ Más datos (posición, cumpleaños)</summary>
     <div class="grid-2">
-      <label>Año de nacimiento <input type="number" id="anioJugador" min="1990" max="2030" placeholder="Ej: 2012" required></label>
       <label>Posición (opcional)
         <select id="posicionJugador">
           <option value="">— Sin definir —</option>
@@ -461,6 +468,7 @@ dialog.dlg-ui { width: min(420px, 92vw); }
         </select>
       </label>
     </div>
+    </details>
     <div class="consent-box">
       <label>Nombre del padre / madre / tutor <input type="text" id="tutorJugador" maxlength="120" required></label>
       <label class="consent-check"><input type="checkbox" id="consentJugador" required><span>El padre, madre o tutor me autorizó a registrar los datos de su hijo/a y conoce el <a href="aviso-privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</span></label>
@@ -472,6 +480,7 @@ dialog.dlg-ui { width: min(420px, 92vw); }
 </section>
 
 <section id="historial" class="tab-content">
+  <div class="subtabs" data-grupo="partidos"><button type="button" data-tab="historial">🏆 Partidos</button><button type="button" data-tab="stats">📊 Estadísticas</button><button type="button" data-tab="graficos">📈 Gráficos</button></div>
   <h2>Historial de Partidos</h2>
   <div id="edicionBanner" class="edicion-banner">
     <div class="texto">
@@ -503,6 +512,7 @@ dialog.dlg-ui { width: min(420px, 92vw); }
 </section>
 
 <section id="stats" class="tab-content">
+  <div class="subtabs" data-grupo="partidos"><button type="button" data-tab="historial">🏆 Partidos</button><button type="button" data-tab="stats">📊 Estadísticas</button><button type="button" data-tab="graficos">📈 Gráficos</button></div>
   <h2>Estadísticas por Jugador</h2>
   <form id="formFiltroStats" style="display:block">
     <h3 style="margin-top:0">📅 Filtrar por periodo</h3>
@@ -593,6 +603,7 @@ dialog.dlg-ui { width: min(420px, 92vw); }
 </section>
 
 <section id="graficos" class="tab-content">
+  <div class="subtabs" data-grupo="partidos"><button type="button" data-tab="historial">🏆 Partidos</button><button type="button" data-tab="stats">📊 Estadísticas</button><button type="button" data-tab="graficos">📈 Gráficos</button></div>
   <h2>📈 Evolución del Jugador (partidos)</h2>
   <form>
     <div class="grid-2">
@@ -667,16 +678,6 @@ dialog.dlg-ui { width: min(420px, 92vw); }
   </div>
   <div class="aviso-backup">☁️ Tus datos se guardan en la nube y se copian en este dispositivo para trabajar sin señal. Aun así, descarga un respaldo de vez en cuando.</div>
   <div class="card">
-    <h3 style="margin-top:0">📤 Exportar copia de seguridad</h3>
-    <button type="button" class="btn-exito" id="btnExportar">📥 Descargar backup (.json)</button>
-  </div>
-  <div class="card" id="cardImportar">
-    <h3 style="margin-top:0">📥 Importar equipos desde un respaldo (.json)</h3>
-    <p class="hint">Los equipos del archivo se agregan como equipos nuevos; no se borra nada.</p>
-    <input type="file" id="inputImportar" accept=".json" style="margin-bottom:0.5rem">
-    <div class="acciones"><button type="button" class="btn-primary" id="btnImportar">📂 Importar</button></div>
-  </div>
-  <div class="card">
     <h3 style="margin-top:0">🎂 Cumpleaños de hoy</h3>
     <div id="cumplesAjustes" style="font-size:0.9rem"></div>
   </div>
@@ -690,6 +691,18 @@ dialog.dlg-ui { width: min(420px, 92vw); }
   <div class="card">
     <p style="font-size:0.85rem;color:#64748b">MiDT · Panel del Entrenador — Versión 9.0 (nube)</p>
   </div>
+  <details class="mas-datos card-det"><summary>🔧 Respaldo y herramientas avanzadas</summary>
+  <div class="card">
+    <h3 style="margin-top:0">📤 Exportar copia de seguridad</h3>
+    <button type="button" class="btn-exito" id="btnExportar">📥 Descargar backup (.json)</button>
+  </div>
+  <div class="card" id="cardImportar">
+    <h3 style="margin-top:0">📥 Importar equipos desde un respaldo (.json)</h3>
+    <p class="hint">Los equipos del archivo se agregan como equipos nuevos; no se borra nada.</p>
+    <input type="file" id="inputImportar" accept=".json" style="margin-bottom:0.5rem">
+    <div class="acciones"><button type="button" class="btn-primary" id="btnImportar">📂 Importar</button></div>
+  </div>
+  </details>
 </section>
 
 </div><!-- /appStaff -->
@@ -838,20 +851,22 @@ document.getElementById('btnEliminarEquipo').addEventListener('click', async () 
 });
 
 // ============ TABS ============
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.add('active');
-    const t = btn.dataset.tab;
-    if (t === 'stats') renderStats();
-    if (t === 'historial') renderHistorial();
-    if (t === 'graficos') renderGraficos();
-    if (t === 'ejercicios') renderEjerciciosSection();
-    if (t === 'ajustes') renderCumplesAjustes();
-  });
-});
+const GRUPO_DE = { partido:'partido', plantilla:'equipo', calendario:'equipo', historial:'partidos', stats:'partidos', graficos:'partidos', ejercicios:'evaluar', ajustes:'ajustes' };
+function irATab(t) {
+  const g = GRUPO_DE[t]; if (!g || !document.getElementById(t)) return;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.grupo === g));
+  document.querySelectorAll('.subtabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(t).classList.add('active');
+  if (t === 'stats') renderStats();
+  if (t === 'historial') renderHistorial();
+  if (t === 'graficos') renderGraficos();
+  if (t === 'calendario') renderEntrenos();
+  if (t === 'ejercicios') renderEjerciciosSection();
+  if (t === 'ajustes') renderCumplesAjustes();
+}
+document.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => irATab(btn.dataset.tab)));
+irATab('partido');
 
 // ============ ENTRENADOR ============
 const formEntrenador = document.getElementById('formEntrenador');
@@ -2327,8 +2342,7 @@ function renderAll() {
 // Abrir la pestaña indicada en la URL (#partido, #stats, ...) — usado por los atajos del manifest
 function abrirTabDesdeHash() {
   const id = location.hash.replace('#', '');
-  const btn = id && document.querySelector(`.tab[data-tab="${id}"]`);
-  if (btn) btn.click();
+  if (id) irATab(id);
 }
 window.addEventListener('hashchange', abrirTabDesdeHash);
 
